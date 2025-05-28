@@ -1,10 +1,10 @@
-﻿using FileSystem.Common;
-using ModelContextProtocol.Server;
-using System.ComponentModel;
+﻿using System.ComponentModel;
 using System.IO.Compression;
 using System.Text.Json;
+using FileSystem.Common;
+using ModelContextProtocol.Server;
 
-namespace FileSystem.Tools;
+namespace FileSystem;
 
 public static partial class FileSystemTools
 {
@@ -16,7 +16,6 @@ public static partial class FileSystemTools
     {
         try
         {
-            // セキュリティチェック
             Security.ValidateIsAllowedDirectory(path);
             
             if (!File.Exists(path) && !Directory.Exists(path))
@@ -28,15 +27,12 @@ public static partial class FileSystemTools
                 });
             }
             
-            // 圧縮レベルの解析
             CompressionLevel level = ParseCompressionLevel(compressionLevel);
             
-            // 出力パスの決定
             string zipFilePath = string.IsNullOrWhiteSpace(outputPath)
                 ? Path.Combine(Path.GetDirectoryName(path), Path.GetFileName(path) + ".zip")
                 : outputPath;
             
-            // 出力パスのセキュリティチェック
             Security.ValidateIsAllowedDirectory(zipFilePath);
             
             if (!Security.HasWritePermission(zipFilePath))
@@ -48,7 +44,6 @@ public static partial class FileSystemTools
                 });
             }
 
-            // 既存のZIPファイルを削除
             if (File.Exists(zipFilePath))
             {
                 File.Delete(zipFilePath);
@@ -56,7 +51,6 @@ public static partial class FileSystemTools
 
             if (Directory.Exists(path))
             {
-                // ディレクトリ圧縮
                 await Task.Run(() => 
                 {
                     ZipFile.CreateFromDirectory(path, zipFilePath, level, false);
@@ -64,7 +58,6 @@ public static partial class FileSystemTools
             }
             else
             {
-                // 単一ファイル圧縮
                 using (FileStream zipToCreate = new FileStream(zipFilePath, FileMode.Create))
                 {
                     using (ZipArchive archive = new ZipArchive(zipToCreate, ZipArchiveMode.Create))
@@ -104,7 +97,6 @@ public static partial class FileSystemTools
     {
         try
         {
-            // セキュリティチェック
             Security.ValidateIsAllowedDirectory(filePath);
             
             if (!File.Exists(filePath))
@@ -125,12 +117,10 @@ public static partial class FileSystemTools
                 });
             }
 
-            // 展開先ディレクトリの決定
             string extractDir = string.IsNullOrWhiteSpace(outputPath)
                 ? Path.Combine(Path.GetDirectoryName(filePath), Path.GetFileNameWithoutExtension(filePath))
                 : outputPath;
             
-            // 出力パスのセキュリティチェック
             Security.ValidateIsAllowedDirectory(extractDir);
             
             if (!Security.HasWritePermission(extractDir))
@@ -142,12 +132,10 @@ public static partial class FileSystemTools
                 });
             }
 
-            // 展開先ディレクトリの処理
             if (Directory.Exists(extractDir))
             {
                 if (overwrite)
                 {
-                    // 既存ディレクトリを削除
                     Directory.Delete(extractDir, true);
                     Directory.CreateDirectory(extractDir);
                 }
@@ -165,30 +153,25 @@ public static partial class FileSystemTools
                 Directory.CreateDirectory(extractDir);
             }
 
-            // ZIPファイルの展開
             await Task.Run(() =>
             {
                 using (ZipArchive archive = ZipFile.OpenRead(filePath))
                 {
-                    // エントリごとに処理
                     foreach (ZipArchiveEntry entry in archive.Entries)
                     {
                         string entryFullPath = Path.Combine(extractDir, entry.FullName);
                         string entryDir = Path.GetDirectoryName(entryFullPath);
 
-                        // サブディレクトリの作成
                         if (!Directory.Exists(entryDir) && !string.IsNullOrEmpty(entryDir))
                         {
                             Directory.CreateDirectory(entryDir);
                         }
 
-                        // ディレクトリのみの場合はスキップ
                         if (string.IsNullOrEmpty(entry.Name))
                         {
                             continue;
                         }
 
-                        // ファイルの展開
                         entry.ExtractToFile(entryFullPath, overwrite);
                     }
                 }

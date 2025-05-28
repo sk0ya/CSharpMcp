@@ -3,7 +3,7 @@ using System.Diagnostics;
 using System.Text;
 using ModelContextProtocol.Server;
 
-namespace MsBuild;
+namespace Dotnet.MsBuild;
 
 [McpServerToolType]
 public class DotnetBuildTools

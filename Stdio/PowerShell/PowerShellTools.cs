@@ -17,13 +17,11 @@ namespace PowerShellTools
         {
             if (_allowedCommands == null)
             {
-                // 埋め込みリソースからJSONを読み込む
                 var assembly = Assembly.GetExecutingAssembly();
                 using (var stream = assembly.GetManifestResourceStream("PowerShellTools.Resources.allowed_commands.json"))
                 {
                     if (stream == null)
                     {
-                        // デフォルトのコマンドリストを使用
                         _allowedCommands = new List<string>
                             {
                                 "Get-Process", "Get-Service", "Get-Item", "Get-ChildItem", "Get-Content",
@@ -33,7 +31,6 @@ namespace PowerShellTools
                     }
                     else
                     {
-                        // リソースからJSONを読み込む
                         using (var reader = new StreamReader(stream))
                         {
                             string json = reader.ReadToEnd();
@@ -118,26 +115,21 @@ namespace PowerShellTools
             {
                 using (var ps = PowerShell.Create())
                 {
-                    // 制約付き言語モードを設定
                     ps.AddScript("$ExecutionContext.SessionState.LanguageMode = 'ConstrainedLanguage'").Invoke();
                     
-                    // 許可されたコマンドのみを使用できるようにJEAセッション設定を構成
                     var allowedCmdlets = GetAllowedCommands();
                     var iss = InitialSessionState.CreateDefault();
                     iss.LanguageMode = PSLanguageMode.ConstrainedLanguage;
                     
-                    // 許可コマンドのセットアップ
                     var commandVisibility = new Dictionary<string, bool>();
                     foreach (var cmdlet in allowedCmdlets)
                     {
                         commandVisibility[cmdlet] = true;
                     }
                     
-                    // JEAセッション構成の適用
                     ps.Runspace.SessionStateProxy.SetVariable("__PSLockdownPolicy", 4);
                     ps.Runspace.SessionStateProxy.SetVariable("__PSLockdownCommands", commandVisibility);
                     
-                    // 許可されたコマンドのみ実行可能にする
                     ps.AddScript(@"
                         function Test-CommandAllowed {
                             param([string]$CommandName)
@@ -155,7 +147,6 @@ namespace PowerShellTools
                         }
                     ").Invoke();
                     
-                    // メインスクリプトの実行
                     ps.Commands.Clear();
                     ps.AddScript(script);
                     
@@ -164,7 +155,6 @@ namespace PowerShellTools
                         ps.AddParameter("urls", args);
                     }
                     
-                    // 結果を文字列として取得
                     ps.Commands.AddCommand("Out-String");
                     var results = ps.Invoke();
                     
@@ -179,7 +169,6 @@ namespace PowerShellTools
                     }
                     else
                     {
-                        // エラーがあれば取得して返す
                         if (ps.Streams.Error.Count > 0)
                         {
                             StringBuilder errorBuilder = new StringBuilder();
@@ -204,13 +193,11 @@ namespace PowerShellTools
         {
             var allowedCommands = GetAllowedCommands();
             
-            // パイプラインの処理
             var pipelineCommands = commandInput.Split(new[] { '|' }, StringSplitOptions.RemoveEmptyEntries);
             foreach (var pipeCommand in pipelineCommands)
             {
                 var trimmedCommand = pipeCommand.Trim();
                 
-                // コマンドの基本名を抽出（パラメータ等を除く）
                 string commandName;
                 int spaceIndex = trimmedCommand.IndexOf(' ');
                 if (spaceIndex > 0)

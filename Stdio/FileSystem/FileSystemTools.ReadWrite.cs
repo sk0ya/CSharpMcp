@@ -1,10 +1,10 @@
-﻿using FileSystem.Common;
-using ModelContextProtocol.Server;
-using System.ComponentModel;
+﻿using System.ComponentModel;
 using System.Text;
 using System.Text.Json;
+using FileSystem.Common;
+using ModelContextProtocol.Server;
 
-namespace FileSystem.Tools;
+namespace FileSystem;
 
 [McpServerToolType]
 public static partial class FileSystemTools
@@ -15,10 +15,8 @@ public static partial class FileSystemTools
         [Description("The text to replace it with")] string content,
         [Description("The encoding to use (utf-8, shift-jis, etc.). Default is utf-8.")] string encodingName = "utf-8")
     {
-        // セキュリティチェック
         Security.ValidateIsAllowedDirectory(filePath);
 
-        // 親ディレクトリが存在しない場合は作成
         string directory = Path.GetDirectoryName(filePath);
         if (!string.IsNullOrEmpty(directory) && !Directory.Exists(directory))
         {
@@ -40,55 +38,44 @@ public static partial class FileSystemTools
                 [Description("The encoding to use (utf-8, shift-jis, etc.). Default is utf-8.")] string encodingName = "utf-8",
         [Description("The expected number of replacements to perform. Defaults to 1 if not specified.")] int replacementCount = 1)
     {
-        // セキュリティチェック
         Security.ValidateIsAllowedDirectory(filePath);
 
         string content;
         var encoding = ResolveEncoding(encodingName);
 
-        // 既存ファイルの読み込み - バイナリとして読み込んでエンコーディング変換を避ける
         byte[] fileBytes = File.ReadAllBytes(filePath);
         content = encoding.GetString(fileBytes);
 
-        // 空のoldStringの場合は新規ファイル作成として扱う
         if (!string.IsNullOrEmpty(oldString))
         {
-            // 改行コードの正規化
             string normalizedContent = NormalizeLineEndings(content);
             string normalizedOldString = NormalizeLineEndings(oldString);
             string normalizedNewString = NormalizeLineEndings(newString);
 
-            // 置換処理
             int actualReplacements = 0;
             if (replacementCount == 1)
             {
-                // 単一置換
                 int index = normalizedContent.IndexOf(normalizedOldString);
                 if (index >= 0)
                 {
                     normalizedContent = normalizedContent.Substring(0, index) + normalizedNewString + normalizedContent.Substring(index + normalizedOldString.Length);
                     actualReplacements = 1;
-                    content = normalizedContent; // 正規化されたコンテンツで更新
+                    content = normalizedContent;
                 }
             }
             else
             {
-                // 置換前の出現回数をカウント
                 int occurrencesBeforeReplace = CountOccurrences(normalizedContent, normalizedOldString);
 
-                // 複数置換
                 string newContent = normalizedContent.Replace(normalizedOldString, normalizedNewString);
 
-                // 置換後の正確な置換回数を計算
                 if (normalizedOldString.Length == normalizedNewString.Length)
                 {
-                    // 同じ長さの場合、出現回数の変化で計算
                     int occurrencesAfterReplace = CountOccurrences(newContent, normalizedNewString);
                     actualReplacements = occurrencesBeforeReplace - (occurrencesAfterReplace - occurrencesBeforeReplace);
                 }
                 else
                 {
-                    // 異なる長さの場合、直接置換回数をカウント
                     actualReplacements = occurrencesBeforeReplace;
                 }
 
@@ -111,18 +98,15 @@ public static partial class FileSystemTools
         }
         else
         {
-            // oldStringが空の場合、contentを完全に上書き
             content = newString;
         }
 
-        // 非同期で書き込み - バイナリに変換して書き込む
         byte[] outputBytes = encoding.GetBytes(content);
         File.WriteAllBytes(filePath, outputBytes);
 
         return FileOpelationResult.Success(filePath);
     }
 
-    //[McpServerTool, Description("Gets basic file information for multiple files. filePaths requires a List")]
     public static async Task<List<Dictionary<string, string>>> GetMultipleFilesInfoAsync([Description("The full paths to the files to be read.")] string[]? filePaths,
         [Description("The encoding to use (utf-8, shift-jis, etc.). Default is utf-8.")] string encodingName = "utf-8")
     {
@@ -131,19 +115,16 @@ public static partial class FileSystemTools
 
         foreach (string filePath in filePaths)
         {
-            // セキュリティチェック
             Security.ValidateIsAllowedDirectory(filePath);
 
-            // 最小限の情報を構築
             var resultDict = new Dictionary<string, string>
             {
                 ["filePath"] = filePath,
                 ["fileName"] = Path.GetFileName(filePath)
             };
 
-            // 内容と行数の取得
             string content = await File.ReadAllTextAsync(filePath, encoding);
-            resultDict["lineCount"] = content.Split(new[] { "\r\n", "\r", "\n" }, StringSplitOptions.None).Length.ToString();
+            resultDict["lineCount"] = content.Split(new[] { "\\r\\n", "\\r", "\\n" }, StringSplitOptions.None).Length.ToString();
             resultDict["content"] = content;
 
             results.Add(resultDict);
@@ -158,21 +139,17 @@ public static partial class FileSystemTools
     {
         Encoding encoding = ResolveEncoding(encodingName);
 
-        // セキュリティチェック
         Security.ValidateIsAllowedDirectory(filePath);
 
-        // 最小限の情報を構築
         var resultDict = new Dictionary<string, string>
         {
             ["filePath"] = filePath,
             ["fileName"] = Path.GetFileName(filePath)
         };
 
-        // 内容と行数の取得
         string content = await File.ReadAllTextAsync(filePath, encoding);
-        resultDict["lineCount"] = content.Split(new[] { "\r\n", "\r", "\n" }, StringSplitOptions.None).Length.ToString();
+        resultDict["lineCount"] = content.Split(new[] { "\\r\\n", "\\r", "\\n" }, StringSplitOptions.None).Length.ToString();
         resultDict["content"] = content;
-
 
         return resultDict;
     }
@@ -184,10 +161,8 @@ public static partial class FileSystemTools
     {
         try
         {
-            // セキュリティチェック
             Security.ValidateIsAllowedDirectory(fullPath);
 
-            // パスの存在確認
             bool isFile = File.Exists(fullPath);
             bool isDirectory = Directory.Exists(fullPath);
 
@@ -200,7 +175,6 @@ public static partial class FileSystemTools
                 });
             }
 
-            // 書き込み権限の確認
             if (!Security.HasWritePermission(fullPath))
             {
                 return JsonSerializer.Serialize(new
@@ -210,7 +184,6 @@ public static partial class FileSystemTools
                 });
             }
 
-            // 削除実行
             if (isFile)
             {
                 File.Delete(fullPath);
@@ -233,7 +206,6 @@ public static partial class FileSystemTools
         }
         catch (IOException ex) when (ex.Message.Contains("directory is not empty"))
         {
-            // ディレクトリが空でない場合の特別なハンドリング
             return JsonSerializer.Serialize(new
             {
                 Status = "Error",
@@ -254,7 +226,6 @@ public static partial class FileSystemTools
     {
         try
         {
-            // セキュリティチェック
             Security.ValidateIsAllowedDirectory(sourcePath);
             Security.ValidateIsAllowedDirectory(destinationPath);
 
@@ -270,7 +241,6 @@ public static partial class FileSystemTools
                 });
             }
 
-            // 権限チェック
             if (!Security.HasReadPermission(sourcePath) || !Security.HasWritePermission(sourcePath))
             {
                 return JsonSerializer.Serialize(new
@@ -289,7 +259,6 @@ public static partial class FileSystemTools
                 });
             }
 
-            // 移動先ディレクトリの作成（必要な場合）
             if (isFile)
             {
                 string destDir = Path.GetDirectoryName(destinationPath);
@@ -298,7 +267,6 @@ public static partial class FileSystemTools
                     Directory.CreateDirectory(destDir);
                 }
 
-                // ファイルの移動
                 File.Move(sourcePath, destinationPath, overwrite);
                 return JsonSerializer.Serialize(new
                 {
@@ -308,7 +276,6 @@ public static partial class FileSystemTools
             }
             else
             {
-                // ディレクトリの移動
                 Directory.Move(sourcePath, destinationPath);
                 return JsonSerializer.Serialize(new
                 {
@@ -329,7 +296,6 @@ public static partial class FileSystemTools
     {
         try
         {
-            // セキュリティチェック
             Security.ValidateIsAllowedDirectory(directoryPath);
 
             if (Directory.Exists(directoryPath))
@@ -351,7 +317,6 @@ public static partial class FileSystemTools
                 });
             }
 
-            // ディレクトリ作成
             Directory.CreateDirectory(directoryPath);
 
             return JsonSerializer.Serialize(new
@@ -369,26 +334,16 @@ public static partial class FileSystemTools
 
     #region Private Methods
 
-    /// <summary>
-    /// 改行コードを正規化します
-    /// </summary>
-    /// <param name="text">正規化する文字列</param>
-    /// <returns>正規化された文字列</returns>
     private static string NormalizeLineEndings(string text)
     {
         if (string.IsNullOrEmpty(text))
             return text;
 
-        // まず全ての改行コードをLFに変換
-        text = text.Replace("\r\n", "\n").Replace("\r", "\n");
+        text = text.Replace("\\r\\n", "\\n").Replace("\\r", "\\n");
         
-        // 環境に応じた改行コードに変換
-        return text.Replace("\n", Environment.NewLine);
+        return text.Replace("\\n", Environment.NewLine);
     }
 
-    /// <summary>
-    /// エンコーディング名からEncodingオブジェクトを取得します
-    /// </summary>
     private static Encoding ResolveEncoding(string encodingName)
     {
         if (string.IsNullOrWhiteSpace(encodingName))
@@ -402,17 +357,10 @@ public static partial class FileSystemTools
         }
         catch (ArgumentException)
         {
-            // 不明なエンコーディング名の場合はデフォルトを使用
             return Constants.DefaultEncoding;
         }
     }
 
-    /// <summary>
-    /// 指定された文字列内の特定のパターンの出現回数をカウントします
-    /// </summary>
-    /// <param name="text">検索対象のテキスト</param>
-    /// <param name="pattern">検索するパターン</param>
-    /// <returns>パターンの出現回数</returns>
     private static int CountOccurrences(string text, string pattern)
     {
         if (string.IsNullOrEmpty(text) || string.IsNullOrEmpty(pattern))

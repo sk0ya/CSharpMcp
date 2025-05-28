@@ -2,17 +2,8 @@ using System.Text.Json;
 
 namespace FileSystem.Common;
 
-/// <summary>
-/// 例外処理のためのユーティリティクラス
-/// </summary>
 public static class ExceptionHandling
 {
-    /// <summary>
-    /// 例外情報をJSON形式で返します
-    /// </summary>
-    /// <param name="ex">発生した例外</param>
-    /// <param name="operation">実行しようとした操作の説明</param>
-    /// <returns>例外情報を含むJSON文字列</returns>
     public static string FormatExceptionAsJson(Exception ex, string operation)
     {
         var errorInfo = new
@@ -31,16 +22,8 @@ public static class ExceptionHandling
         });
     }
 
-    /// <summary>
-    /// 例外を処理して適切なレスポンスを返します
-    /// </summary>
-    /// <param name="ex">発生した例外</param>
-    /// <param name="operation">実行しようとした操作の説明</param>
-    /// <param name="logger">ロガーインスタンス（オプション）</param>
-    /// <returns>エラーメッセージ</returns>
     public static string HandleException(Exception ex, string operation, ILogger logger = null)
     {
-        // ロガーが指定されていれば例外をログに記録
         logger?.LogError(ex, $"Error during {operation}: {ex.Message}");
 
         if (ex is UnauthorizedAccessException)
@@ -70,9 +53,6 @@ public static class ExceptionHandling
     }
 }
 
-/// <summary>
-/// ロギングのためのシンプルなインターフェース
-/// </summary>
 public interface ILogger
 {
     void LogInformation(string message);

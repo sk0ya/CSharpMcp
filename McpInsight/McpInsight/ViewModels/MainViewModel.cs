@@ -9,9 +9,6 @@ using System.Threading.Tasks;
 
 namespace McpInsight.ViewModels
 {
-    /// <summary>
-    /// メインビューモデル
-    /// </summary>
     public partial class MainViewModel : ViewModelBase, IStatusReporter
     {
         private readonly HistoryManager _historyManager;
@@ -42,14 +39,8 @@ namespace McpInsight.ViewModels
         [ObservableProperty]
         private string _mcpServerArguments = "";
 
-        /// <summary>
-        /// フォルダパス履歴
-        /// </summary>
         public ObservableCollection<string> FolderPathHistory => _historyManager.FolderPathHistory;
 
-        /// <summary>
-        /// サーバー引数履歴
-        /// </summary>
         public ObservableCollection<string> McpServerArgumentsHistory => _historyManager.ServerArgumentsHistory;
 
         #endregion
@@ -64,7 +55,6 @@ namespace McpInsight.ViewModels
             {
                 if (SetProperty(ref _selectedMethod, value))
                 {
-                    // SelectedMethodが変更されたら自動的にテンプレートを生成
                     GenerateJsonTemplateForSelectedMethod();
                 }
             }
@@ -81,33 +71,22 @@ namespace McpInsight.ViewModels
 
         #region Constructors
 
-        /// <summary>
-        /// コンストラクタ
-        /// </summary>
         public MainViewModel()
             : this(new string[0])
         {
         }
 
-        /// <summary>
-        /// コンストラクタ
-        /// </summary>
-        /// <param name="args">コマンドライン引数</param>
         public MainViewModel(string[] args)
         {
-            // 履歴マネージャーの初期化
             string historyFilePath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "mcpinsight_history.json");
             _historyManager = new HistoryManager(historyFilePath);
 
-            // ビューモデルの初期化
             _commandLineProcessor = new CommandLineProcessor(this, args);
             _methodLoader = new McpMethodLoader(this);
             _methodExecutor = new McpMethodExecutor(this);
 
-            // 履歴からデータを復元
             InitializeFromHistory();
 
-            // コマンドライン引数の処理
             if (args.Length > 0)
             {
                 ProcessCommandLineArguments();
@@ -118,51 +97,39 @@ namespace McpInsight.ViewModels
 
         #region Private Methods
 
-        /// <summary>
-        /// 履歴からデータを初期化
-        /// </summary>
         private void InitializeFromHistory()
         {
-            // フォルダパスの設定
             if (_historyManager.FolderPathHistory.Count > 0)
             {
                 FolderPath = _historyManager.FolderPathHistory[0];
             }
 
-            // サーバー引数の設定
             if (_historyManager.ServerArgumentsHistory.Count > 0)
             {
                 McpServerArguments = _historyManager.ServerArgumentsHistory[0];
             }
         }
 
-        /// <summary>
-        /// コマンドライン引数を処理
-        /// </summary>
         private void ProcessCommandLineArguments()
         {
             if (_commandLineProcessor.ProcessCommandLineArguments())
             {
-                // フォルダパスを設定
                 if (!string.IsNullOrEmpty(_commandLineProcessor.FolderPath))
                 {
                     FolderPath = _commandLineProcessor.FolderPath;
                     _historyManager.AddToFolderPathHistory(FolderPath);
                 }
 
-                // サーバー引数を設定
                 if (!string.IsNullOrEmpty(_commandLineProcessor.ServerArgs))
                 {
                     McpServerArguments = _commandLineProcessor.ServerArgs;
                     _historyManager.AddToArgumentsHistory(McpServerArguments);
                 }
 
-                // メソッドをロード
                 Task.Run(async () =>
                 {
                     await LoadMcpMethodsAsync();
                     
-                    // メソッド名が指定され、ロードが完了したら自動実行
                     if (!string.IsNullOrEmpty(_commandLineProcessor.MethodName))
                     {
                         var method = await _commandLineProcessor.AutoExecuteMethodAsync(McpMethods, _methodExecutor);
@@ -176,9 +143,6 @@ namespace McpInsight.ViewModels
             }
         }
 
-        /// <summary>
-        /// 選択されたメソッドのJSONテンプレートを生成
-        /// </summary>
         private void GenerateJsonTemplateForSelectedMethod()
         {
             if (SelectedMethod == null)
@@ -202,28 +166,16 @@ namespace McpInsight.ViewModels
 
         #region IStatusReporter Implementation
 
-        /// <summary>
-        /// ステータスメッセージを設定
-        /// </summary>
-        /// <param name="message">メッセージ</param>
         public void SetStatusMessage(string message)
         {
             StatusMessage = message;
         }
 
-        /// <summary>
-        /// エラーメッセージを設定
-        /// </summary>
-        /// <param name="errorMessage">エラーメッセージ</param>
         public void SetErrorMessage(string errorMessage)
         {
             ErrorMessage = errorMessage;
         }
 
-        /// <summary>
-        /// 実行結果を設定
-        /// </summary>
-        /// <param name="result">実行結果</param>
         public void SetMethodResult(string result)
         {
             MethodResult = result;
@@ -233,20 +185,15 @@ namespace McpInsight.ViewModels
 
         #region Commands
 
-        /// <summary>
-        /// フォルダ選択コマンド
-        /// </summary>
         [RelayCommand]
         private async Task BrowseFolder()
         {
-            // In a real application, this would use a folder picker dialog
             if (string.IsNullOrEmpty(FolderPath))
             {
                 FolderPath = @"C:\Projects\MCPServer\CSharpMcpServer\CreateMcpServer";
             }
             else
             {
-                // Make sure the folder path is valid
                 if (!Directory.Exists(FolderPath))
                 {
                     ErrorMessage = "Invalid folder path";
@@ -254,7 +201,6 @@ namespace McpInsight.ViewModels
                 }
             }
             
-            // 履歴に追加
             _historyManager.AddToFolderPathHistory(FolderPath);
             
             await LoadMcpMethodsAsync();
@@ -267,9 +213,6 @@ namespace McpInsight.ViewModels
             await _methodLoader.DisposeMcpMethodsAsync();
         }
 
-        /// <summary>
-        /// フォルダをエクスプローラーで開くコマンド
-        /// </summary>
         [RelayCommand]
         private void OpenFolderInExplorer()
         {
@@ -290,9 +233,6 @@ namespace McpInsight.ViewModels
             }
         }
 
-        /// <summary>
-        /// メソッド実行コマンド
-        /// </summary>
         [RelayCommand]
         private async Task ExecuteMethod()
         {
@@ -304,7 +244,6 @@ namespace McpInsight.ViewModels
 
             try
             {
-                // 引数を履歴に追加
                 _historyManager.AddToArgumentsHistory(McpServerArguments);
 
                 IsExecuting = true;
@@ -312,7 +251,6 @@ namespace McpInsight.ViewModels
                 ErrorMessage = "";
                 StatusMessage = $"Executing {SelectedMethod.Name}...";
 
-                // メソッド実行
                 await _methodExecutor.ExecuteMethodAsync(SelectedMethod, JsonInput);
             }
             catch (Exception ex)
@@ -327,10 +265,6 @@ namespace McpInsight.ViewModels
             }
         }
 
-        /// <summary>
-        /// MCPメソッドを読み込む
-        /// </summary>
-        /// <returns>ロード結果</returns>
         private async Task<bool> LoadMcpMethodsAsync()
         {
             McpMethods.Clear();

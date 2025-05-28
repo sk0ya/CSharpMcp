@@ -1,10 +1,9 @@
-﻿using CreateMcpServer;
-using ModelContextProtocol.Server;
-using System.ComponentModel;
+﻿using System.ComponentModel;
 using System.Diagnostics;
-using System.Text;
+using CreateMcpServer;
+using ModelContextProtocol.Server;
 
-namespace CreateMcpServer;
+namespace Dotnet.CreatMcpServer;
 
 [McpServerToolType]
 public class CreateMcpServerTools
@@ -14,16 +13,13 @@ public class CreateMcpServerTools
     {
         var folderPath = Path.Combine(CreateMcpServerPath.RootFolderPath, feature);
 
-        // フォルダが既に存在するかチェック
         if (Directory.Exists(folderPath))
         {
             return $"フォルダ '{folderPath}' は既に存在します。";
         }
 
-        // フォルダを作成
         Directory.CreateDirectory(folderPath);
 
-        // プロジェクトファイルを作成
         try
         {
             CreateConsoleProject(folderPath);
@@ -33,13 +29,10 @@ public class CreateMcpServerTools
             return ex.Message;
         }
 
-        // Program.cs ファイルを作成
         CreateProgramCs(folderPath);
 
-        // ToolsクラスファイルをFeatureNameTools.csという形で作成
         CreateToolsFile(folderPath, feature);
 
-        // ソリューションファイルにプロジェクトを追加
         if (AddProjectToSolution(feature, out var errorMesssage))
         {
             return errorMesssage;
@@ -67,10 +60,10 @@ public class CreateMcpServerTools
 
         using (var process = Process.Start(processInfo))
         {
-            var output = process.StandardOutput.ReadToEnd();
-            var error = process.StandardError.ReadToEnd();
-            process.WaitForExit();
-            if (process.ExitCode != 0)
+            var output = process?.StandardOutput.ReadToEnd();
+            var error = process?.StandardError.ReadToEnd();
+            process?.WaitForExit();
+            if (process != null && process.ExitCode != 0)
             {
                 throw new Exception($"コンソールプロジェクトの作成に失敗しました。{output}{error}");
             }
@@ -101,10 +94,10 @@ public class CreateMcpServerTools
 
         using (var process = Process.Start(processInfo))
         {
-            var output = process.StandardOutput.ReadToEnd();
-            var error = process.StandardError.ReadToEnd();
-            process.WaitForExit();
-            if (process.ExitCode != 0)
+            var output = process?.StandardOutput.ReadToEnd();
+            var error = process?.StandardError.ReadToEnd();
+            process?.WaitForExit();
+            if (process != null && process.ExitCode != 0)
             {
                 Console.WriteLine(output);
                 Console.WriteLine(error);
@@ -163,12 +156,11 @@ public static class {feature}Tools
     private static bool AddProjectToSolution(string feature, out string errorMessage)
     {
         errorMessage = string.Empty;
-        // ルートフォルダにある .sln ファイルを検索
-        string rootPath = CreateMcpServerPath.RootFolderPath;
+        var rootPath = CreateMcpServerPath.RootFolderPath;
         var parentDir = Directory.GetParent(rootPath);
-        var slnFiles = parentDir.GetFiles("*.sln").Select(x => x.FullName);
+        var slnFiles = parentDir?.GetFiles("*.sln").Select(x => x.FullName);
 
-        if (slnFiles.Count() == 0)
+        if (!slnFiles.Any())
         {
             errorMessage = "ソリューションファイルが見つかりませんでした。";
             return false;
@@ -177,7 +169,7 @@ public static class {feature}Tools
         foreach (string slnFile in slnFiles)
         {
             var scriptBlock = $@"
-        Set-Location '{parentDir.FullName.Replace("'", "''")}'
+        Set-Location '{parentDir?.FullName.Replace("'", "''")}'
         dotnet sln {slnFile} add {feature}\\{feature}.csproj
     ";
 
@@ -191,14 +183,12 @@ public static class {feature}Tools
                 CreateNoWindow = true
             };
 
-            using (var process = Process.Start(processInfo))
+            using var process = Process.Start(processInfo);
+            process?.WaitForExit();
+            if (process != null && process.ExitCode != 0)
             {
-                process.WaitForExit();
-                if (process.ExitCode != 0)
-                {
-                    errorMessage = $"プロジェクトをソリューション {slnFile} に追加できませんでした。";
-                    return false;
-                }
+                errorMessage = $"プロジェクトをソリューション {slnFile} に追加できませんでした。";
+                return false;
             }
         }
 

@@ -1,7 +1,8 @@
-﻿using ModelContextProtocol.Server;
-using System.ComponentModel;
+﻿using System.ComponentModel;
+using CreateMcpServer;
+using ModelContextProtocol.Server;
 
-namespace CreateMcpServer
+namespace Dotnet.CreatMcpServer
 {
     [McpServerPromptType]
     [Description("MCP Serverプロジェクト作成用のプロンプトを提供するクラス")]
@@ -27,7 +28,6 @@ namespace CreateMcpServer
         [McpServerPrompt, Description("プロジェクトのREADME.mdファイルを更新するためのプロンプト")]
         public static string UpdateReadMePrompt(string feature)
         {
-            var featureToolsPath = Path.Combine(CreateMcpServerPath.RootFolderPath, "Servers",feature, $"{feature}Tools.cs");
             var featureReadMePath = Path.Combine(CreateMcpServerPath.RootFolderPath, "Servers", feature, $"README.md");
             var createMcpServerToolsPath = Path.Combine(CreateMcpServerPath.RootFolderPath,  nameof(CreateMcpServer), $"{nameof(CreateMcpServerTools)}.cs");
 

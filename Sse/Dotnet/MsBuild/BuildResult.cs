@@ -1,5 +1,5 @@
 ﻿
-namespace MsBuild;
+namespace Dotnet.MsBuild;
 
 public class BuildResult
 {

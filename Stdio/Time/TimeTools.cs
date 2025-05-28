@@ -1,7 +1,7 @@
-﻿using ModelContextProtocol.Server;
-using System.ComponentModel;
+﻿using System.ComponentModel;
+using ModelContextProtocol.Server;
 
-namespace Time.Tools;
+namespace Time;
 
 [McpServerToolType]
 public static class TimeTools

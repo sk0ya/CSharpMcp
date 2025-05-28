@@ -3,9 +3,6 @@ using System.Text.RegularExpressions;
 
 namespace FileSystem;
 
-/// <summary>
-/// ファイルシステム操作のセキュリティチェックを提供するクラス
-/// </summary>
 public static class Security
 {
     // 危険とみなすファイル拡張子のパターン
@@ -17,11 +14,6 @@ public static class Security
     // システムディレクトリパターン
     private static readonly Regex SystemDirectoryPattern = new Regex(@"^[A-Za-z]:\\(Windows|Program Files|Program Files \(x86\)|System|System32)", RegexOptions.IgnoreCase);
 
-    /// <summary>
-    /// パスがアクセス許可されたディレクトリ内にあるかを検証します
-    /// </summary>
-    /// <param name="path">検証するパス</param>
-    /// <exception cref="UnauthorizedAccessException">パスがアクセス許可されていない場合</exception>
     public static void ValidateIsAllowedDirectory(string path)
     {
         if (string.IsNullOrWhiteSpace(path))
@@ -44,7 +36,6 @@ public static class Security
             throw new UnauthorizedAccessException("ディレクトリトラバーサルパターンは許可されていません。");
         }
 
-        // コマンドライン引数で指定されたディレクトリに制限
         var args = Environment.GetCommandLineArgs();
         bool isAllowed = false;
 
@@ -65,7 +56,6 @@ public static class Security
             }
             catch
             {
-                // 無効なパスは無視
                 continue;
             }
         }
@@ -76,11 +66,6 @@ public static class Security
         }
     }
 
-    /// <summary>
-    /// 指定されたファイルパスが実行可能ファイルでないことを確認します
-    /// </summary>
-    /// <param name="filePath">チェックするファイルパス</param>
-    /// <returns>実行可能ファイルでない場合はtrue</returns>
     public static bool IsNonExecutableFile(string filePath)
     {
         if (string.IsNullOrWhiteSpace(filePath))
@@ -89,22 +74,15 @@ public static class Security
         return !DangerousFileExtensions.IsMatch(filePath);
     }
 
-    /// <summary>
-    /// アプリケーションが指定されたパスに対して読み取り権限を持っているか確認します
-    /// </summary>
-    /// <param name="path">確認するパス</param>
-    /// <returns>読み取り権限がある場合はtrue</returns>
     public static bool HasReadPermission(string path)
     {
         try
         {
-            // ディレクトリの場合
             if (Directory.Exists(path))
             {
                 Directory.GetFiles(path, "*", SearchOption.TopDirectoryOnly);
                 return true;
             }
-            // ファイルの場合
             else if (File.Exists(path))
             {
                 using var fs = File.Open(path, FileMode.Open, FileAccess.Read, FileShare.Read);
@@ -127,16 +105,10 @@ public static class Security
         }
     }
 
-    /// <summary>
-    /// アプリケーションが指定されたパスに対して書き込み権限を持っているか確認します
-    /// </summary>
-    /// <param name="path">確認するパス</param>
-    /// <returns>書き込み権限がある場合はtrue</returns>
     public static bool HasWritePermission(string path)
     {
         try
         {
-            // ディレクトリの場合
             if (Directory.Exists(path))
             {
                 string testFile = Path.Combine(path, $"write_test_{Guid.NewGuid()}.tmp");
@@ -144,7 +116,6 @@ public static class Security
                 File.Delete(testFile);
                 return true;
             }
-            // ファイルの場合
             else if (File.Exists(path))
             {
                 using var fs = File.Open(path, FileMode.Open, FileAccess.ReadWrite, FileShare.None);
@@ -152,7 +123,6 @@ public static class Security
             }
             else
             {
-                // ファイルが存在しない場合、親ディレクトリでチェック
                 string parentDir = Path.GetDirectoryName(path);
                 if (!string.IsNullOrEmpty(parentDir) && Directory.Exists(parentDir))
                 {

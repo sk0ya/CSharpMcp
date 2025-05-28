@@ -5,16 +5,8 @@ using System.Text.Json;
 
 namespace McpInsight.Models
 {
-    /// <summary>
-    /// JSONテンプレート生成ユーティリティクラス
-    /// </summary>
     public static class JsonTemplateGenerator
     {
-        /// <summary>
-        /// JsonSchemaからテンプレートを生成
-        /// </summary>
-        /// <param name="jsonSchema">JsonSchema</param>
-        /// <returns>JSONテンプレート</returns>
         public static string GenerateFromJsonSchema(JsonElement jsonSchema)
         {
             try
@@ -24,19 +16,15 @@ namespace McpInsight.Models
                     return "{}";
                 }
 
-                // JsonElementからテンプレートを生成
                 var template = new JObject();
                 
-                // propertiesを取得
                 if (jsonSchema.TryGetProperty("properties", out var propertiesElement) && 
                     propertiesElement.ValueKind == JsonValueKind.Object)
                 {
-                    // propertiesの各プロパティに対して処理
                     foreach (var property in propertiesElement.EnumerateObject())
                     {
                         string propName = property.Name;
                         
-                        // 型に基づいてデフォルト値を設定
                         if (property.Value.TryGetProperty("type", out var typeElement))
                         {
                             string type = typeElement.GetString() ?? "string";
@@ -66,7 +54,6 @@ namespace McpInsight.Models
                         }
                         else
                         {
-                            // 型が指定されていない場合はnull
                             template[propName] = null;
                         }
                     }

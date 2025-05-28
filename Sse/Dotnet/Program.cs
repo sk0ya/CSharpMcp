@@ -1,7 +1,8 @@
 ﻿using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.DependencyInjection;
-using MsBuild;
 using CreateMcpServer;
+using Dotnet.CreatMcpServer;
+using Dotnet.MsBuild;
 using Microsoft.AspNetCore.Hosting;
 
 var builder = WebApplication.CreateBuilder(args);

@@ -1,15 +1,9 @@
 using System.Text.RegularExpressions;
 
-namespace FileSystem.Tools;
+namespace FileSystem;
 
-/// <summary>
-/// .gitignoreファイルのパターンを解析し、ファイルやディレクトリの除外を管理するクラス
-/// </summary>
 public static class GitIgnoreParser
 {
-    /// <summary>
-    /// 指定されたパスが除外パターンに一致するかを判定します
-    /// </summary>
     public static bool IsIgnored(string relativePath, List<Regex> ignorePatterns)
     {
         if (relativePath.Split('/').Any(part => part.StartsWith(".") && part != "." && part != ".."))
@@ -24,9 +18,6 @@ public static class GitIgnoreParser
         return false;
     }
 
-    /// <summary>
-    /// 指定したディレクトリから.gitignoreパターンを読み込みます
-    /// </summary>
     public static List<Regex> LoadIgnorePatterns(string rootPath)
     {
         var patterns = new List<Regex>();
@@ -42,9 +33,6 @@ public static class GitIgnoreParser
         return patterns;
     }
 
-    /// <summary>
-    /// .gitignoreファイルからパターンを解析し、正規表現のリストとして返します
-    /// </summary>
     public static List<Regex> ParseGitIgnore(string gitignorePath, string currentDir, string rootPath)
     {
         var patterns = new List<Regex>();
@@ -71,9 +59,6 @@ public static class GitIgnoreParser
         return patterns;
     }
 
-    /// <summary>
-    /// Gitの除外パターンを正規表現に変換します
-    /// </summary>
     private static string ConvertGitWildcardToRegex(string pattern, string relativeDir)
     {
         string result;
@@ -138,36 +123,33 @@ public static class GitIgnoreParser
         return @"^" + result + @"$";
     }
 
-    /// <summary>
-    /// 共通の除外パターンを取得します
-    /// </summary>
     public static List<Regex> GetCommonIgnorePatterns()
     {
         var patterns = new List<Regex>
         {
-            new Regex(@"^(?:.+/)?\.git(?:/.*)?$", RegexOptions.IgnoreCase),
-            new Regex(@"^(?:.+/)?\.next(?:/.*)?$", RegexOptions.IgnoreCase),
+            new(@"^(?:.+/)?\.git(?:/.*)?$", RegexOptions.IgnoreCase),
+            new(@"^(?:.+/)?\.next(?:/.*)?$", RegexOptions.IgnoreCase),
             
-            new Regex(@"^(?:.+/)?bin(?:/.*)?$", RegexOptions.IgnoreCase),
-            new Regex(@"^(?:.+/)?obj(?:/.*)?$", RegexOptions.IgnoreCase),
-            new Regex(@"^(?:.+/)?target(?:/.*)?$", RegexOptions.IgnoreCase),
-            new Regex(@"^(?:.+/)?dist(?:/.*)?$", RegexOptions.IgnoreCase),
-            new Regex(@"^(?:.+/)?lib(?:/.*)?$", RegexOptions.IgnoreCase),
+            new(@"^(?:.+/)?bin(?:/.*)?$", RegexOptions.IgnoreCase),
+            new(@"^(?:.+/)?obj(?:/.*)?$", RegexOptions.IgnoreCase),
+            new(@"^(?:.+/)?target(?:/.*)?$", RegexOptions.IgnoreCase),
+            new(@"^(?:.+/)?dist(?:/.*)?$", RegexOptions.IgnoreCase),
+            new(@"^(?:.+/)?lib(?:/.*)?$", RegexOptions.IgnoreCase),
             
-            new Regex(@"^(?:.+/)?\.vs(?:/.*)?$", RegexOptions.IgnoreCase),
-            new Regex(@"^.*\.user$", RegexOptions.IgnoreCase),
-            new Regex(@"^.*\.suo$", RegexOptions.IgnoreCase),
+            new(@"^(?:.+/)?\.vs(?:/.*)?$", RegexOptions.IgnoreCase),
+            new(@"^.*\.user$", RegexOptions.IgnoreCase),
+            new(@"^.*\.suo$", RegexOptions.IgnoreCase),
             
-            new Regex(@"^.*\.cache$", RegexOptions.IgnoreCase),
+            new(@"^.*\.cache$", RegexOptions.IgnoreCase),
             
-            new Regex(@"^.*~$", RegexOptions.IgnoreCase),
-            new Regex(@"^.*\.bak$", RegexOptions.IgnoreCase),
+            new(@"^.*~$", RegexOptions.IgnoreCase),
+            new(@"^.*\.bak$", RegexOptions.IgnoreCase),
             
-            new Regex(@"^.*\.log$", RegexOptions.IgnoreCase),
+            new(@"^.*\.log$", RegexOptions.IgnoreCase),
             
-            new Regex(@"^(?:.+/)?packages(?:/.*)?$", RegexOptions.IgnoreCase),
+            new(@"^(?:.+/)?packages(?:/.*)?$", RegexOptions.IgnoreCase),
             
-            new Regex(@"^(?:.+/)?node_modules(?:/.*)?$", RegexOptions.IgnoreCase)
+            new(@"^(?:.+/)?node_modules(?:/.*)?$", RegexOptions.IgnoreCase)
         };
 
         return patterns;

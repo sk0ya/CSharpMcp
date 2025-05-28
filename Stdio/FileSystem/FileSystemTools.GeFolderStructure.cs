@@ -1,25 +1,14 @@
-﻿using FileSystem.Common;
-using ModelContextProtocol.Server;
-using System.ComponentModel;
+﻿using System.ComponentModel;
 using System.Text;
 using System.Text.Json;
 using System.Text.RegularExpressions;
+using FileSystem.Common;
+using ModelContextProtocol.Server;
 
-namespace FileSystem.Tools;
+namespace FileSystem;
 
-/// <summary>
-/// フォルダ構造の取得と関連機能を提供します
-/// </summary>
 public static partial class FileSystemTools
 {
-    /// <summary>
-    /// 指定したディレクトリの階層構造をYAML形式で取得します
-    /// </summary>
-    /// <param name="fullPath">フォルダ構造を取得するディレクトリのパス</param>
-    /// <param name="recursive">サブディレクトリも再帰的に取得するかどうか</param>
-    /// <param name="format">出力形式（yaml または json）</param>
-    /// <param name="excludePattern">除外するファイル/ディレクトリのパターン（正規表現）</param>
-    /// <returns>フォルダ構造を表現するYAMLまたはJSON文字列</returns>
     [McpServerTool, Description("Retrieves the hierarchical folder structure in YAML format from a specified directory path.")]
     public static async Task<string> GetFolderStructureAsync(
         [Description("Absolute path to the root directory whose folder structure should be retrieved.")] string fullPath,
@@ -29,7 +18,6 @@ public static partial class FileSystemTools
     {
         try
         {
-            // セキュリティチェック
             Security.ValidateIsAllowedDirectory(fullPath);
             
             if (!Directory.Exists(fullPath))
@@ -58,7 +46,6 @@ public static partial class FileSystemTools
                     : $"Error: 読み取り権限がありません: {fullPath}";
             }
 
-            // 除外パターンの準備
             Regex excludeRegex = null;
             if (!string.IsNullOrWhiteSpace(excludePattern))
             {
@@ -80,10 +67,8 @@ public static partial class FileSystemTools
                 }
             }
 
-            // .gitignoreパターンの読み込み
             var ignorePatterns = await Task.Run(() => GitIgnoreParser.LoadIgnorePatterns(fullPath));
 
-            // フォルダ構造の構築
             var result = await Task.Run(() => 
             {
                 var sb = new StringBuilder();
@@ -96,10 +81,8 @@ public static partial class FileSystemTools
                 return sb.ToString();
             });
 
-            // 要求された形式で返す
             if (format.ToLowerInvariant() == "json")
             {
-                // YAMLからJSONに変換
                 var yamlStructure = result;
                 var jsonStructure = ConvertYamlToJson(yamlStructure);
                 return jsonStructure;
@@ -117,9 +100,6 @@ public static partial class FileSystemTools
 
     #region Private Methods
 
-    /// <summary>
-    /// ディレクトリを再帰的に走査してYAML形式でフォルダ構造を構築します
-    /// </summary>
     private static void TraverseDirectoryYaml(
         string path,
         StringBuilder sb,
@@ -129,16 +109,13 @@ public static partial class FileSystemTools
         bool recursive,
         Regex excludeRegex = null)
     {
-        // ファイルとディレクトリを取得（フィルタリング済み）
         var (filteredFiles, filteredDirs) = GetFilteredItems(path, ignorePatterns, rootPath, excludeRegex);
 
-        // ファイルを追加
         foreach (var file in filteredFiles)
         {
             sb.AppendLine($"{indent}- {Path.GetFileName(file)}");
         }
 
-        // サブディレクトリを追加
         foreach (var dir in filteredDirs)
         {
             var dirName = Path.GetFileName(dir);
@@ -146,7 +123,6 @@ public static partial class FileSystemTools
 
             if (!recursive) continue;
 
-            // サブディレクトリの.gitignoreを処理
             var childIgnorePatterns = new List<Regex>(ignorePatterns);
             string gitignorePath = Path.Combine(dir, ".gitignore");
             if (File.Exists(gitignorePath))
@@ -154,7 +130,6 @@ public static partial class FileSystemTools
                 childIgnorePatterns.AddRange(GitIgnoreParser.ParseGitIgnore(gitignorePath, dir, rootPath));
             }
 
-            // 再帰的に処理
             TraverseDirectoryYaml(
                 dir,
                 sb,
@@ -167,25 +142,19 @@ public static partial class FileSystemTools
         }
     }
 
-    /// <summary>
-    /// 指定したパスのファイルとディレクトリをフィルタリングして取得します
-    /// </summary>
     private static (string[] files, string[] dirs) GetFilteredItems(
         string path, 
         List<Regex> ignorePatterns, 
         string rootPath,
         Regex excludeRegex = null)
     {
-        // 相対パスを正規化
         string relativePath = GetNormalizedRelativePath(path, rootPath);
         
-        // このディレクトリが無視対象なら空を返す
         if (path != rootPath && GitIgnoreParser.IsIgnored(relativePath, ignorePatterns))
         {
             return (Array.Empty<string>(), Array.Empty<string>());
         }
 
-        // 安全に取得
         string[] files;
         string[] directories;
         try
@@ -195,11 +164,9 @@ public static partial class FileSystemTools
         }
         catch (UnauthorizedAccessException)
         {
-            // アクセス拒否の場合は空を返す
             return (Array.Empty<string>(), Array.Empty<string>());
         }
 
-        // gitignoreでのフィルタリング
         var filteredFiles = files
             .Where(file => !GitIgnoreParser.IsIgnored(GetNormalizedRelativePath(file, rootPath), ignorePatterns))
             .Where(file => excludeRegex == null || !excludeRegex.IsMatch(file))
@@ -215,17 +182,11 @@ public static partial class FileSystemTools
         return (filteredFiles, filteredDirs);
     }
 
-    /// <summary>
-    /// パスを正規化して相対パスにします
-    /// </summary>
     private static string GetNormalizedRelativePath(string path, string rootPath)
     {
         return Path.GetRelativePath(rootPath, path).Replace("\\", "/");
     }
 
-    /// <summary>
-    /// YAMLをJSON形式に変換します（簡易版）
-    /// </summary>
     private static string ConvertYamlToJson(string yaml)
     {
         var jsonObj = new Dictionary<string, object>();
@@ -239,21 +200,17 @@ public static partial class FileSystemTools
             var line = rawLine.TrimEnd();
             if (string.IsNullOrWhiteSpace(line)) continue;
             
-            // インデントを取得
             int indent = line.TakeWhile(char.IsWhiteSpace).Count();
             string content = line.Trim();
             
-            // ルートレベルに戻る処理
             while (indent < currentIndent && stack.Count > 0)
             {
                 currentObj = stack.Pop();
                 currentIndent -= 2;
             }
             
-            // コンテンツを解析
             if (content.EndsWith(':'))
             {
-                // ディレクトリ行
                 string dirName = content.TrimEnd(':');
                 var newObj = new Dictionary<string, object>();
                 currentObj[dirName] = newObj;
@@ -264,10 +221,8 @@ public static partial class FileSystemTools
             }
             else if (content.StartsWith('-'))
             {
-                // ファイル行
                 string fileName = content.Substring(1).Trim();
                 
-                // 配列を取得または作成
                 if (!currentObj.ContainsKey("files"))
                 {
                     currentObj["files"] = new List<string>();
