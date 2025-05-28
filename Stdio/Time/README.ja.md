@@ -30,7 +30,7 @@ public static string GetCurrentTime()
             "args": [
                 "run",
                 "--project",
-                "absolute\\path\\to\\CSharpMCPServer\\Servers\\Time",
+                "absolute\\path\\to\\CSharpMCP\\Stdio\\Time",
                 "--no-build"
             ]
         }
@@ -39,7 +39,7 @@ public static string GetCurrentTime()
 ```
 
 **重要**: 
-- `absolute\\path\\to\\CSharpMCPServer\\Time`の部分を実際のプロジェクトパスに置き換えてください
+- `absolute\\path\\to\\CSharpMC\\Stdio\\Time`の部分を実際のプロジェクトパスに置き換えてください
 
 ## タイムゾーン
 

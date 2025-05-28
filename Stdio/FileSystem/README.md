@@ -145,7 +145,7 @@ Opens a file with a specific application:
 - Run the following command from the repository root directory:
 
 ```bash
-dotnet build CSharpMcpServer/FileSystem
+dotnet build CSharpMcp/Stdio/FileSystem
 ```
 
 ### Integration with Claude Desktop
@@ -159,7 +159,7 @@ To use with Claude Desktop, add the following configuration to your `claude_desk
             "args": [
                 "run",
                 "--project",
-                "absolute\\path\\to\\CSharpMCPServer\\Servers\\FileSystem",
+                "absolute\\path\\to\\CSharpMCPServer\\Stdio\\FileSystem",
                 "--no-build",
                 "--",
                 "/path/to/allowed/dir"
@@ -170,7 +170,7 @@ To use with Claude Desktop, add the following configuration to your `claude_desk
 ```
 
 **Important**: 
-- Replace `absolute\\path\\to\\CSharpMCPServer\\FileSystem` with your actual project path
+- Replace `absolute\\path\\to\\\\CSharpMCP\\Stdio\\FileSystem` with your actual project path
 - You can specify additional allowed directories with `/path/to/other/allowed/dir` as needed
 
 ## Security

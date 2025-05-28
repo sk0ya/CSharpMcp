@@ -1,5 +1,7 @@
 ﻿# PowerShell
 
+[English version here](README.md)
+
 CSharpMcpServer PowerShellモジュールは、MCP（Model Context Protocol）環境内でPowerShellコマンドを安全に実行するためのインターフェースを提供します。事前に定義されたPowerShellコマンドレットのセットを制御された方法で実行でき、不正な操作を防ぐためのセキュリティ対策を実装しています。
 
 ## 機能
@@ -58,6 +60,29 @@ string result = ExecuteCommand("Get-Process");
 string paramResult = ExecuteCommand("Get-Process", "{ \"Name\": \"explorer\" }");
 ```
 
+## Claude Desktopとの統合
+
+Claude Desktopで使用するには、以下の設定を`claude_desktop_config.json`に追加します：
+
+```json
+{
+    "mcpServers": {
+        "PowerShell": {
+            "command": "dotnet",
+            "args": [
+                "run",
+                "--project",
+                "absolute\\path\\to\\CSharpMCP\\Stdio\\PowerShell",
+                "--no-build"
+            ]
+        }
+    }
+}
+```
+
+**重要**: 
+- `absolute\\path\\to\\CSharpMCP\\Stdio\\PowerShell`の部分を実際のプロジェクトパスに置き換えてください
+
 ## デフォルトで許可されているコマンド
 
 モジュールにはデフォルトで以下のコマンドが許可されています：
@@ -87,3 +112,21 @@ string paramResult = ExecuteCommand("Get-Process", "{ \"Name\": \"explorer\" }")
 ## カスタム設定
 
 許可コマンドリストは埋め込みリソース `Resources/allowed_commands.json` を変更することでカスタマイズできます。
+
+## ビルド
+
+### コンパイルとビルド
+- dotnet 8.0以上が必要
+- リポジトリのルートディレクトリから以下のコマンドを実行:
+
+```bash
+dotnet build CSharpMcp/Stdio/PowerShell
+```
+
+## セキュリティ考慮事項
+
+このサーバーは複数層のセキュリティを実装しています：
+- 事前承認されたコマンドのみが実行可能
+- PowerShellは制約言語モードで実行
+- すべてのパラメータが検証・サニタイズされる
+- 許可されたコマンド以外のシステムリソースへの直接アクセスなし

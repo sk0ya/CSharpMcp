@@ -27,7 +27,7 @@ Processes multiple RSS feeds and outputs titles and URLs as markdown-formatted l
 - Run the following command from the repository root directory:
 
 ```bash
-dotnet build CSharpMcpServer/Rss
+dotnet build CSharpMcp/Stdio/Rss
 ```
 
 ### Integration with Claude Desktop
@@ -41,7 +41,7 @@ To use with Claude Desktop, add the following configuration to your `claude_desk
             "args": [
                 "run",
                 "--project",
-                "absolute\\path\\to\\CSharpMCPServer\\Servers\\Rss",
+                "absolute\\path\\to\\CSharpMCP\\Stdio\\Rss",
                 "--no-build",
                 "--",
                 "https://example.com/rss"
@@ -52,7 +52,7 @@ To use with Claude Desktop, add the following configuration to your `claude_desk
 ```
 
 **Important**: 
-- Replace `absolute\\path\\to\\CSharpMCPServer\\Rss` with your actual project path
+- Replace `absolute\\path\\to\\CSharpMCP\\Stdio\\Rss` with your actual project path
 - You can specify one or more RSS feed URLs after the `--` argument
 
 ## Security

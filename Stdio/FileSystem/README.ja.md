@@ -127,6 +127,17 @@ public static string OpenWithApplication(string path, string verb = "open")
 - **verb**: 使用する動詞（open, edit, print など）、デフォルトは"open"
 - **戻り値**: 処理結果のJSONメッセージ
 
+### OpenWithSpecificApplication
+```csharp
+public static string OpenWithSpecificApplication(string filePath, string applicationPath, string arguments = "")
+```
+ファイルを特定のアプリケーションで開きます：
+- **説明**: ファイルを指定されたプログラムで開く
+- **filePath**: 開くファイルのパス
+- **applicationPath**: 使用するアプリケーションのパス
+- **arguments**: 追加のコマンドライン引数
+- **戻り値**: 処理結果のJSONメッセージ
+
 ## 使用方法
 
 ### コンパイルとビルド
@@ -134,7 +145,7 @@ public static string OpenWithApplication(string path, string verb = "open")
 - リポジトリのルートディレクトリから以下のコマンドを実行:
 
 ```bash
-dotnet build CSharpMcpServer/FileSystem
+dotnet build CSharpMcp/Stdio/FileSystem
 ```
 
 ### Claude Desktopとの連携
@@ -148,7 +159,7 @@ Claude Desktopで使用するには、以下の設定を`claude_desktop_config.j
             "args": [
                 "run",
                 "--project",
-                "absolute\\path\\to\\CSharpMCPServer\\Servers\\FileSystem",
+                "absolute\\path\\to\\CSharpMCP\\Stdio\\FileSystem",
                 "--no-build",
                 "--",
                 "/path/to/allowed/dir"
@@ -159,7 +170,7 @@ Claude Desktopで使用するには、以下の設定を`claude_desktop_config.j
 ```
 
 **重要**: 
-- `absolute\\path\\to\\CSharpMCPServer\\FileSystem`の部分を実際のプロジェクトパスに置き換えてください
+- `absolute\\path\\to\\CSharpMCP\\Stdio\\FileSystem`の部分を実際のプロジェクトパスに置き換えてください
 - 必要に応じて`/path/to/other/allowed/dir`にアクセスを許可したい追加のディレクトリを指定できます
 
 ## セキュリティ

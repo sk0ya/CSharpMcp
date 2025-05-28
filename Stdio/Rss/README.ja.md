@@ -27,7 +27,7 @@ public static async Task<string> ParseRssFeeds()
 - リポジトリのルートディレクトリから以下のコマンドを実行:
 
 ```bash
-dotnet build CSharpMcpServer/Rss
+dotnet build CSharpMcp/Stdio/Rss
 ```
 
 ### Claude Desktopとの連携
@@ -41,7 +41,7 @@ Claude Desktopで使用するには、以下の設定を`claude_desktop_config.j
             "args": [
                 "run",
                 "--project",
-                "absolute\\path\\to\\CSharpMCPServer\\Servers\\Rss",
+                "absolute\\path\\to\\\\CSharpMCP\\Stdio\\Rss",
                 "--no-build",
                 "--",
                 "https://example.com/rss"
@@ -52,7 +52,7 @@ Claude Desktopで使用するには、以下の設定を`claude_desktop_config.j
 ```
 
 **重要**: 
-- `absolute\\path\\to\\CSharpMCPServer\\Rss`の部分を実際のプロジェクトパスに置き換えてください
+- `absolute\\\\path\\\\to\\\\CSharpMCPServer\\\\Stdio\\\\Rss`の部分を実際のプロジェクトパスに置き換えてください
 - URLの部分にRSSフィードのURLを指定できます（複数指定可能）
 
 ## セキュリティ

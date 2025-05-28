@@ -1,5 +1,7 @@
 ﻿# PowerShell
 
+[日本語版はこちら](README.ja.md)
+
 The CSharpMcpServer PowerShell module provides a secure interface for executing PowerShell commands within the MCP (Model Context Protocol) environment. It allows for controlled execution of a predefined set of PowerShell cmdlets while implementing security measures to prevent unauthorized operations.
 
 ## Features
@@ -30,7 +32,7 @@ public static string GetAvailableCommands()
 ```
 
 Retrieves a list of available PowerShell commands:
-- **Description**: 利用可能なPowerShellコマンド一覧を取得します
+- **Description**: Gets a list of available PowerShell commands
 - **Returns**: JSON-formatted string containing the list of allowed commands
 
 ### ExecuteCommand
@@ -40,7 +42,7 @@ public static string ExecuteCommand(string command, string parameters = "{}")
 ```
 
 Safely executes a PowerShell command:
-- **Description**: PowerShellコマンドを安全に実行します
+- **Description**: Safely executes PowerShell commands
 - **command**: The PowerShell command to execute
 - **parameters**: JSON-formatted string containing command parameters (default: empty object)
 - **Returns**: Command execution results as a string
@@ -57,6 +59,29 @@ string result = ExecuteCommand("Get-Process");
 // Execute a PowerShell command with parameters
 string paramResult = ExecuteCommand("Get-Process", "{ \"Name\": \"explorer\" }");
 ```
+
+## Integration with Claude Desktop
+
+To use with Claude Desktop, add the following configuration to your `claude_desktop_config.json`:
+
+```json
+{
+    "mcpServers": {
+        "PowerShell": {
+            "command": "dotnet",
+            "args": [
+                "run",
+                "--project",
+                "absolute\\path\\to\\CSharpMCP\\Stdio\\PowerShell",
+                "--no-build"
+            ]
+        }
+    }
+}
+```
+
+**Important**: 
+- Replace `absolute\\path\\to\\CSharpMCP\\Stdio\\PowerShell` with your actual project path
 
 ## Default Allowed Commands
 
@@ -87,3 +112,21 @@ Additional commands can be configured through the `allowed_commands.json` resour
 ## Custom Configuration
 
 The allowed command list can be customized by modifying the embedded resource `Resources/allowed_commands.json`.
+
+## Building
+
+### Compilation and Building
+- Requires dotnet 8.0 or higher
+- Run the following command from the repository root directory:
+
+```bash
+dotnet build CSharpMcp/Stdio/PowerShell
+```
+
+## Security Considerations
+
+This server implements multiple layers of security:
+- Only pre-approved commands can be executed
+- PowerShell runs in constrained language mode
+- All parameters are validated and sanitized
+- No direct access to system resources outside of allowed commands
