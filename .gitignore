@@ -363,3 +363,10 @@ MigrationBackup/
 FodyWeavers.xsd
 /.idea/.idea.CSharpMcpServer/.idea
 /Sse/Dotnet/.idea/.idea.Dotnet.dir/.idea
+
+# IDE configuration files
+encodings.xml
+indexLayout.xml
+projectSettingsUpdater.xml
+vcs.xml
+workspace.xml
