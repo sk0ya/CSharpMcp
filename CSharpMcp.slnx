@@ -1,0 +1,15 @@
+<Solution>
+  <Folder Name="/McpInsight/">
+    <Project Path="McpInsight\McpInsight.Desktop\McpInsight.Desktop.csproj" Type="Classic C#" />
+    <Project Path="McpInsight\McpInsight\McpInsight.csproj" Type="Classic C#" />
+  </Folder>
+  <Folder Name="/Sse/">
+    <Project Path="Sse\Dotnet\Dotnet.csproj" Type="Classic C#" />
+  </Folder>
+  <Folder Name="/Stdio/">
+    <Project Path="Stdio\FileSystem\FileSystem.csproj" Type="Classic C#" />
+    <Project Path="Stdio\PowerShell\PowerShell.csproj" Type="Classic C#" />
+    <Project Path="Stdio\Rss\Rss.csproj" Type="Classic C#" />
+    <Project Path="Stdio\Time\Time.csproj" Type="Classic C#" />
+  </Folder>
+</Solution>

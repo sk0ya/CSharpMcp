@@ -1,0 +1,228 @@
+﻿<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:vm="using:McpInsight.ViewModels"
+             xmlns:models="using:McpInsight.Models"
+             xmlns:sys="clr-namespace:System;assembly=System.Runtime"
+             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="600"
+             x:Class="McpInsight.Views.MainView"
+             x:CompileBindings="True"
+             x:DataType="vm:MainViewModel">
+  <Design.DataContext>
+    <vm:MainViewModel />
+  </Design.DataContext>
+
+  <UserControl.Styles>
+    <!-- スタイル定義 -->
+    <Style Selector="TextBlock.Label">
+      <Setter Property="FontWeight" Value="SemiBold"/>
+      <Setter Property="Foreground" Value="#FFFFFF"/>
+      <Setter Property="VerticalAlignment" Value="Center"/>
+      <Setter Property="Margin" Value="0,0,10,0"/>
+      <Setter Property="Width" Value="100"/>
+    </Style>
+    
+    <Style Selector="TextBox">
+      <Setter Property="Background" Value="#2D2D30"/>
+      <Setter Property="Foreground" Value="#FFFFFF"/>
+      <Setter Property="BorderBrush" Value="#3F3F46"/>
+      <Setter Property="Padding" Value="8,4"/>
+      <Setter Property="CornerRadius" Value="3"/>
+    </Style>
+    
+    <Style Selector="Button">
+      <Setter Property="Background" Value="#007ACC"/>
+      <Setter Property="Foreground" Value="White"/>
+      <Setter Property="Padding" Value="8,4"/>
+      <Setter Property="CornerRadius" Value="3"/>
+    </Style>
+    
+    <Style Selector="Button:pointerover">
+      <Setter Property="Background" Value="#1C97EA"/>
+    </Style>
+    
+    <Style Selector="Button.IconButton">
+      <Setter Property="Background" Value="Transparent"/>
+      <Setter Property="BorderBrush" Value="Transparent"/>
+      <Setter Property="Foreground" Value="#CCCCCC"/>
+      <Setter Property="Width" Value="30"/>
+      <Setter Property="Height" Value="30"/>
+      <Setter Property="Padding" Value="5"/>
+      <Setter Property="CornerRadius" Value="3"/>
+    </Style>
+    
+    <Style Selector="Button.IconButton:pointerover">
+      <Setter Property="Background" Value="#3E3E42"/>
+      <Setter Property="Foreground" Value="#FFFFFF"/>
+    </Style>
+    
+    <Style Selector="ListBox">
+      <Setter Property="Background" Value="#252526"/>
+      <Setter Property="Foreground" Value="#FFFFFF"/>
+      <Setter Property="BorderBrush" Value="#3F3F46"/>
+    </Style>
+  </UserControl.Styles>
+
+  <Grid RowDefinitions="Auto,*" Margin="5" Background="#1E1E1E">
+    <Border Grid.Row="0" Background="#252526" CornerRadius="5" Padding="15,10" Margin="0,0,0,10"
+            BorderBrush="#3F3F46" BorderThickness="1">
+      <StackPanel Orientation="Vertical" Spacing="10">
+        <!-- Project Path -->
+        <Grid ColumnDefinitions="Auto,*,Auto,Auto">
+          <TextBlock Grid.Column="0" Text="Project Path:" Classes="Label" />
+          <TextBox Grid.Column="1" 
+                   Text="{Binding FolderPath}" 
+                   Watermark="Enter path to MCP Server folder" />
+          <Button Grid.Column="2" Classes="IconButton"
+                  Content="▼" Width="30" Margin="5,0,0,0"
+                  Name="folderHistoryButton"
+                  ToolTip.Tip="Show folder history">
+            <Button.Flyout>
+              <Flyout Placement="Bottom">
+                <Border Background="#252526" BorderBrush="#3F3F46" BorderThickness="1" Padding="5" CornerRadius="3">
+                  <ListBox ItemsSource="{Binding FolderPathHistory}" 
+                           SelectedItem="{Binding FolderPath, Mode=TwoWay}"
+                           Name="folderHistoryListBox"
+                           MaxHeight="200">
+                    <ListBox.ItemTemplate>
+                      <DataTemplate>
+                        <TextBlock Text="{Binding}"/>
+                      </DataTemplate>
+                    </ListBox.ItemTemplate>
+                  </ListBox>
+                </Border>
+              </Flyout>
+            </Button.Flyout>
+          </Button>
+          <Button Grid.Column="3" Classes="IconButton"
+                  Content="🗀" Margin="5,0,0,0" 
+                  Command="{Binding OpenFolderInExplorerCommand}" 
+                  ToolTip.Tip="Open in Explorer" />
+        </Grid>
+        
+        <!-- Arguments -->
+        <Grid ColumnDefinitions="Auto,*,Auto,Auto,Auto">
+          <TextBlock Grid.Column="0" Text="Arguments:" Classes="Label" />
+          <TextBox Grid.Column="1" 
+                   Text="{Binding McpServerArguments}"
+                   Watermark="Enter MCP Server arguments (optional)" />
+          <Button Grid.Column="2" Classes="IconButton"
+                  Content="▼" Width="30" Margin="5,0,0,0"
+                  Name="argumentsHistoryButton"
+                  ToolTip.Tip="Show arguments history">
+            <Button.Flyout>
+              <Flyout Placement="Bottom">
+                <Border Background="#252526" BorderBrush="#3F3F46" BorderThickness="1" Padding="5" CornerRadius="3">
+                  <ListBox ItemsSource="{Binding McpServerArgumentsHistory}" 
+                           SelectedItem="{Binding McpServerArguments, Mode=TwoWay}"
+                           Name="argumentsHistoryListBox"
+                           Width="300"
+                           MaxHeight="200">
+                    <ListBox.ItemTemplate>
+                      <DataTemplate>
+                        <TextBlock Text="{Binding}" />
+                      </DataTemplate>
+                    </ListBox.ItemTemplate>
+                  </ListBox>
+                </Border>
+              </Flyout>
+            </Button.Flyout>
+          </Button>
+          <Button Grid.Column="3" 
+                  Content="Browse" Margin="5,0,0,0" 
+                  Command="{Binding BrowseFolderCommand}" />
+          <Button Grid.Column="4" 
+                  Content="Dispose" Margin="5,0,0,0" 
+                  Command="{Binding DisposeCommand}" />
+        </Grid>
+      </StackPanel>
+    </Border>
+    
+    <Border Grid.Row="1" Background="#252526" CornerRadius="5" Padding="0" 
+            BorderBrush="#3F3F46" BorderThickness="1">
+      <Grid ColumnDefinitions="300,*" RowDefinitions="Auto,*,Auto">
+        <!-- Left Panel - Method List -->
+        <Border Grid.Row="0" Grid.RowSpan="2" Grid.Column="0" 
+                BorderBrush="#3F3F46" BorderThickness="0,0,1,0" Padding="10">
+          <ListBox ItemsSource="{Binding McpMethods}"
+                   SelectedItem="{Binding SelectedMethod}">
+            <ListBox.ItemTemplate>
+              <DataTemplate x:DataType="models:IMcpMethodInfo">
+                <TextBlock Text="{Binding Name}" ToolTip.Tip="{Binding Description}" />
+              </DataTemplate>
+            </ListBox.ItemTemplate>
+          </ListBox>
+        </Border>
+        
+        <!-- Right Panel - Method Details -->
+        <Border Grid.Row="0" Grid.Column="1" 
+                BorderBrush="#3F3F46" BorderThickness="0,0,0,1" Padding="15,10">
+          <StackPanel>
+            <TextBlock Text="Method Details" FontWeight="Bold" Foreground="#CCCCCC" Margin="0,0,0,10" />
+            <TextBlock IsVisible="{Binding SelectedMethod, Converter={x:Static ObjectConverters.IsNotNull}}"
+                       Foreground="#CCCCCC" Margin="0,0,0,5">
+              <TextBlock.Text>
+                <MultiBinding StringFormat="{}Method: {0}">
+                  <Binding Path="SelectedMethod.Name" />
+                </MultiBinding>
+              </TextBlock.Text>
+            </TextBlock>
+            <TextBlock IsVisible="{Binding SelectedMethod, Converter={x:Static ObjectConverters.IsNotNull}}"
+                       TextWrapping="Wrap" Foreground="#CCCCCC">
+              <TextBlock.Text>
+                <MultiBinding StringFormat="{}Description: {0}">
+                  <Binding Path="SelectedMethod.Description" />
+                </MultiBinding>
+              </TextBlock.Text>
+            </TextBlock>
+
+            <!-- Generate JSON Templateボタンは削除されました -->
+          </StackPanel>
+        </Border>
+        
+        <!-- Right Panel - Method Execution -->
+        <Grid Grid.Row="1" Grid.Column="1" RowDefinitions="*,Auto,*" Margin="15,10">
+          <Border Grid.Row="0" 
+                  BorderBrush="#3F3F46" BorderThickness="1" CornerRadius="3">
+            <TextBox Text="{Binding JsonInput}" 
+                     AcceptsReturn="True"
+                     FontFamily="Cascadia Code,Consolas,Menlo,Monospace"
+                     Watermark="Enter JSON parameters here"
+                     BorderThickness="0"
+                     Background="Transparent"
+                     IsReadOnly="{Binding IsExecuting}" />
+          </Border>
+          
+          <Button Grid.Row="1" 
+                  Content="Execute Method" 
+                  Command="{Binding ExecuteMethodCommand}" 
+                  IsEnabled="{Binding !IsExecuting}"
+                  HorizontalAlignment="Left"
+                  Margin="0,10" />
+          
+          <Border Grid.Row="2" 
+                  BorderBrush="#3F3F46" BorderThickness="1" CornerRadius="3">
+            <TextBox Text="{Binding MethodResult}" 
+                     IsReadOnly="True"
+                     AcceptsReturn="True"
+                     FontFamily="Cascadia Code,Consolas,Menlo,Monospace"
+                     Watermark="Execution result will appear here"
+                     BorderThickness="0"
+                     Background="Transparent" />
+          </Border>
+        </Grid>
+
+        <!-- Status Bar -->
+        <Border Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="2" 
+                BorderBrush="#3F3F46" BorderThickness="0,1,0,0"
+                Background="#007ACC" Padding="10,5">
+          <Grid ColumnDefinitions="*,Auto">
+            <TextBlock Grid.Column="0" Text="{Binding StatusMessage}" Foreground="White" />
+            <TextBlock Grid.Column="1" Text="{Binding ErrorMessage}" Foreground="#FF5555" />
+          </Grid>
+        </Border>
+      </Grid>
+    </Border>
+  </Grid>
+</UserControl>
