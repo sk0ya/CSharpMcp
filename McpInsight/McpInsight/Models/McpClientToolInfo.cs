@@ -65,7 +65,7 @@ namespace McpInsight.Models
 
                 // 実行
                 var result = await ClientTool.InvokeAsync(arguments);
-                return result.ToString();
+                return result?.ToString() ?? string.Empty;
             }
             catch (Exception ex)
             {

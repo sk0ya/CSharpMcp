@@ -56,8 +56,8 @@ namespace McpInsight.ViewModels
 
         #region Properties with Custom Implementation
 
-        private IMcpMethodInfo _selectedMethod;
-        public IMcpMethodInfo SelectedMethod
+        private IMcpMethodInfo? _selectedMethod;
+        public IMcpMethodInfo? SelectedMethod
         {
             get => _selectedMethod;
             set

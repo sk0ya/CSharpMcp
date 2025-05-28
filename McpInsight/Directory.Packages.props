@@ -2,6 +2,8 @@
   <!-- https://learn.microsoft.com/en-us/nuget/consume-packages/central-package-management -->
   <PropertyGroup>
     <ManagePackageVersionsCentrally>true</ManagePackageVersionsCentrally>
+    <!-- Suppress package source mapping warnings -->
+    <NoWarn>$(NoWarn);NU1507</NoWarn>
   </PropertyGroup>
   <ItemGroup>
     <!-- Avalonia packages -->
@@ -15,6 +17,7 @@
     <PackageVersion Include="ModelContextProtocol" Version="0.1.0-preview.8" />
     <PackageVersion Include="Newtonsoft.Json" Version="13.0.3" />
     <PackageVersion Include="System.Reflection.MetadataLoadContext" Version="8.0.0" />
-    <PackageVersion Include="Microsoft.Extensions.Caching.Abstractions" Version="9.0.0.0" />
+    <PackageVersion Include="Microsoft.Extensions.Caching.Abstractions" Version="9.0.0" />
+    <PackageVersion Include="Microsoft.Extensions.AI.Abstractions" Version="9.5.0" />
   </ItemGroup>
 </Project>

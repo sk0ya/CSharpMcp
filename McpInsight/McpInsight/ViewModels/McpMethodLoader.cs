@@ -17,7 +17,7 @@ namespace McpInsight.ViewModels
     public class McpMethodLoader
     {
         private readonly IStatusReporter _statusReporter;
-        private IMcpClient _client;
+        private IMcpClient? _client;
         
         /// <summary>
         /// ロードしたMCPメソッド
@@ -185,7 +185,7 @@ namespace McpInsight.ViewModels
         /// <returns>処理の結果</returns>
         private async Task LoadClientTools(string exePath, string exeName)
         {
-            var tools = await _client.ListToolsAsync();
+            var tools = await _client!.ListToolsAsync();
             
             if (tools != null && tools.Any())
             {
@@ -205,7 +205,7 @@ namespace McpInsight.ViewModels
         /// <returns>処理の結果</returns>
         private async Task LoadClientPrompts(string exePath, string exeName)
         {
-            var prompts = await _client.ListPromptsAsync();
+            var prompts = await _client!.ListPromptsAsync();
             if (prompts != null && prompts.Any())
             {
                 foreach (var prompt in prompts)

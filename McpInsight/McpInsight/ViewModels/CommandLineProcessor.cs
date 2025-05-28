@@ -140,7 +140,7 @@ namespace McpInsight.ViewModels
         /// <param name="methodInfos">メソッド情報のリスト</param>
         /// <param name="executor">メソッド実行クラス</param>
         /// <returns>選択されたメソッド情報</returns>
-        public async Task<IMcpMethodInfo> AutoExecuteMethodAsync(
+        public async Task<IMcpMethodInfo?> AutoExecuteMethodAsync(
             IEnumerable<IMcpMethodInfo> methodInfos, 
             McpMethodExecutor executor)
         {
@@ -150,7 +150,7 @@ namespace McpInsight.ViewModels
             }
 
             // メソッド名が指定されていればそれを選択
-            IMcpMethodInfo method = methodInfos.FirstOrDefault(m => 
+            IMcpMethodInfo? method = methodInfos.FirstOrDefault(m => 
                 m.Name.Equals(MethodName, StringComparison.OrdinalIgnoreCase));
 
             if (method != null)

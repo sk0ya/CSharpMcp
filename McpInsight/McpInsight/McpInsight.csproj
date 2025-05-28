@@ -23,5 +23,6 @@
     <PackageReference Include="ModelContextProtocol" />
     <PackageReference Include="Newtonsoft.Json" />
     <PackageReference Include="System.Reflection.MetadataLoadContext" />
+    <PackageReference Include="Microsoft.Extensions.AI.Abstractions" />
   </ItemGroup>
 </Project>

@@ -54,7 +54,7 @@ namespace McpInsight.Models
                 var task = await ClientPrompt.GetAsync(keyValue);
                 
                 // 結果を文字列として結合
-                string result = string.Join("\n", task.Messages.Select(m => m.Content.Text));
+                string result = string.Join("\n", task.Messages.Select(m => m.Content.Text ?? string.Empty));
                 return result;
             }
             catch (Exception ex)
@@ -73,13 +73,14 @@ namespace McpInsight.Models
             {
                 var arguments = ClientPrompt.ProtocolPrompt.Arguments;
                 var template = new JObject();
-                
-                foreach (var argument in arguments)
-                {
-                    var propName = argument.Name;
-                    template[propName] = "";
-                }
-                
+
+                if (arguments != null)
+                    foreach (var argument in arguments)
+                    {
+                        var propName = argument.Name;
+                        template[propName] = "";
+                    }
+
                 return template.ToString(Formatting.Indented);
             }
             catch (Exception)

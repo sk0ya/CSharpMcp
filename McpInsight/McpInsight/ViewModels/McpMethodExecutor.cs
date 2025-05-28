@@ -32,7 +32,7 @@ namespace McpInsight.ViewModels
         /// <param name="methodInfo">実行するメソッド情報</param>
         /// <param name="jsonInput">JSONパラメータ</param>
         /// <returns>実行成功したかどうか</returns>
-        public async Task<bool> ExecuteMethodAsync(IMcpMethodInfo methodInfo, string jsonInput)
+        public async Task<bool> ExecuteMethodAsync(IMcpMethodInfo? methodInfo, string jsonInput)
         {
             if (methodInfo == null)
             {

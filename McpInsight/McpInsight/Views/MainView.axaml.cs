@@ -15,7 +15,7 @@ namespace McpInsight.Views
             this.AttachedToVisualTree += MainView_AttachedToVisualTree;
         }
         
-        private void MainView_AttachedToVisualTree(object sender, VisualTreeAttachmentEventArgs e)
+        private void MainView_AttachedToVisualTree(object? sender, VisualTreeAttachmentEventArgs e)
         {
             // イベントハンドラを設定
             if (folderHistoryListBox != null)
@@ -29,7 +29,7 @@ namespace McpInsight.Views
             }
         }
         
-        private void FolderHistoryListBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        private void FolderHistoryListBox_SelectionChanged(object? sender, SelectionChangedEventArgs e)
         {
             // 項目が選択されたらFlyoutを閉じる
             if (e.AddedItems != null && e.AddedItems.Count > 0)
@@ -38,7 +38,7 @@ namespace McpInsight.Views
             }
         }
         
-        private void ArgumentsHistoryListBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        private void ArgumentsHistoryListBox_SelectionChanged(object? sender, SelectionChangedEventArgs e)
         {
             // 項目が選択されたらFlyoutを閉じる
             if (e.AddedItems != null && e.AddedItems.Count > 0)

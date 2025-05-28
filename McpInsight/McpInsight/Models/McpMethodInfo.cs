@@ -21,8 +21,8 @@ namespace McpInsight.Models
         public string ExeName { get; set; } = string.Empty;
         public string Parameters { get; set; } = string.Empty;
 
-        public McpClientTool ClientTool { get; set; } = null;
-        public McpClientPrompt ClientPrompt { get; set; } = null;
+        public McpClientTool? ClientTool { get; set; } = null;
+        public McpClientPrompt? ClientPrompt { get; set; } = null;
 
         // リストボックスに表示する文字列
         public override string ToString()
