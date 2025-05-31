@@ -13,17 +13,22 @@ class Program
     static async Task Main(string[] args)
     {
         // SSE MCPサーバーのURLを引数から取得、デフォルトはlocalhost:5000
-        string sseServerUrl = args.Length > 0 ? args[0] : "http://localhost:5000/sse";
+            var sseServerUrl = args.FirstOrDefault(arg => 
+        !string.IsNullOrWhiteSpace(arg) && 
+        Uri.IsWellFormedUriString(arg, UriKind.Absolute)) 
+        ?? "http://localhost:5000/sse";
+        
         SseClientTransportOptions sseClientTransportOptions = new()
         {
             Endpoint = new Uri(sseServerUrl)
         };
 
         SseClientTransport clientTransport = new(sseClientTransportOptions);
-
-        var mcpClient = McpClientFactory.CreateAsync(clientTransport).GetAwaiter().GetResult();
-        var tools = mcpClient.ListToolsAsync().GetAwaiter().GetResult();
-        var prompts = mcpClient.ListPromptsAsync().GetAwaiter().GetResult();
+        
+        using var cts = new CancellationTokenSource();
+        var mcpClient = await McpClientFactory.CreateAsync(clientTransport, cancellationToken:cts.Token);
+        var tools = await mcpClient.ListToolsAsync();
+        var prompts = await mcpClient.ListPromptsAsync();
 
         var builder = Host.CreateEmptyApplicationBuilder(settings: null);
         builder.Services
@@ -40,7 +45,7 @@ class Program
                 {
                     Tools = new ToolsCapability
                     {
-                        ListToolsHandler = (_, _) =>
+                        ListToolsHandler = (_, cancellationToken) =>
                             ValueTask.FromResult(new ListToolsResult()
                             {
                                 Tools = tools.Select(x => new Tool()
@@ -66,7 +71,7 @@ class Program
                     },
                     Prompts = new PromptsCapability()
                     {
-                        ListPromptsHandler = (_, _) =>
+                        ListPromptsHandler = (_, cancellationToken) =>
                             ValueTask.FromResult(new ListPromptsResult()
                             {
                                 Prompts = prompts.Select(x => new Prompt()
@@ -82,8 +87,8 @@ class Program
                             var dic = request.Params?.Arguments
                                 ?.ToDictionary<KeyValuePair<string, JsonElement>, string, object?>(
                                     argument => argument.Key, argument => argument.Value);
-                                return mcpClient.GetPromptAsync(name, dic,
-                                    cancellationToken: cancellationToken);
+                            return mcpClient.GetPromptAsync(name, dic,
+                                cancellationToken: cancellationToken);
                             
                         }
                     }
