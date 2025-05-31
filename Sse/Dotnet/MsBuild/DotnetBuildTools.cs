@@ -1,6 +1,5 @@
 ﻿using System.ComponentModel;
 using System.Diagnostics;
-using System.Text;
 using ModelContextProtocol.Server;
 
 namespace Dotnet.MsBuild;
@@ -11,6 +10,7 @@ public class DotnetBuildTools
     [McpServerTool, Description("指定されたプロジェクトやソリューションをdotnetコマンドを使用してビルドします")]
     public BuildResult BuildProject(string projectPath, string configuration = "Debug", string framework = "")
     {
+        
         if (string.IsNullOrEmpty(projectPath))
         {
             return new BuildResult
@@ -21,59 +21,37 @@ public class DotnetBuildTools
             };
         }
 
-        var arguments = $"build \"{projectPath}\" --configuration {configuration}";
+        var arguments = $"dotnet build \"{projectPath}\" --configuration {configuration}";
 
         if (!string.IsNullOrEmpty(framework))
         {
             arguments += $" --framework {framework}";
         }
-
         arguments += " -v:q";
-
-        var processStartInfo = new ProcessStartInfo
+        var scriptBlock = $@"
+        {arguments}
+    ";
+        
+        var processInfo = new ProcessStartInfo
         {
-            FileName = "dotnet",
-            Arguments = arguments,
+            FileName = "powershell.exe",
+            Arguments = $"-NoProfile -ExecutionPolicy Bypass -Command \"{scriptBlock.Replace("\"", "\\\"")}\"",
             RedirectStandardOutput = true,
             RedirectStandardError = true,
             UseShellExecute = false,
             CreateNoWindow = true
         };
 
-        var process = new Process
-        {
-            StartInfo = processStartInfo
-        };
-
-        var outputBuilder = new StringBuilder();
-        var errorBuilder = new StringBuilder();
-
-        process.OutputDataReceived += (sender, e) =>
-        {
-            if (!string.IsNullOrEmpty(e.Data))
-            {
-                outputBuilder.AppendLine(e.Data);
-            }
-        };
-
-        process.ErrorDataReceived += (sender, e) =>
-        {
-            if (!string.IsNullOrEmpty(e.Data))
-            {
-                errorBuilder.AppendLine(e.Data);
-            }
-        };
-
-        process.Start();
-        process.BeginOutputReadLine();
-        process.BeginErrorReadLine();
-        process.WaitForExit();
-
+        using var process = Process.Start(processInfo);
+        var output = process?.StandardOutput.ReadToEnd()??string.Empty;
+        var error = process?.StandardError.ReadToEnd()??string.Empty;
+        process?.WaitForExit();
+        
         return new BuildResult
         {
-            Success = process.ExitCode == 0,
-            Output = outputBuilder.ToString(),
-            ErrorOutput = errorBuilder.ToString(),
+            Success = process?.ExitCode == 0,
+            Output = output.ToString(),
+            ErrorOutput = error.ToString(),
             ExitCode = process.ExitCode
         };
     }

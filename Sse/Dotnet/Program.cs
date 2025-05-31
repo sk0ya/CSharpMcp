@@ -5,42 +5,45 @@ using Dotnet.CreatMcpServer;
 using Dotnet.MsBuild;
 using Microsoft.AspNetCore.Hosting;
 
-var builder = WebApplication.CreateBuilder(args);
-
-try
+internal class Program
 {
-    var configuration = builder.Configuration;
-    var httpAddress = configuration["McpServer:LocalAddress"];
+    public static void Main(string[] args)
+    {
+        var builder = WebApplication.CreateBuilder(args);
+
+        var httpAddress = string.Empty;
+        try
+        {
+            var configuration = builder.Configuration;
+            httpAddress = configuration["McpServer:LocalAddress"];
     
-    if (!string.IsNullOrEmpty(httpAddress))
-    {
-        builder.WebHost.UseUrls(httpAddress);
-        
-        Console.WriteLine($"Server will start on:");
-        Console.WriteLine($"  HTTP:  {httpAddress}");
-    }
-    else
-    {
-        Console.WriteLine("LocalAddress or LocalHttpsAddress not found in configuration. Using default URLs.");
-        builder.WebHost.UseUrls("http://localhost:7001");
+            if (!string.IsNullOrEmpty(httpAddress))
+            {
+                Console.WriteLine($"Server will start on:");
+                Console.WriteLine($"  HTTP:  {httpAddress}");
+            }
+            else
+            {
+                Console.WriteLine("LocalAddress or LocalHttpsAddress not found in configuration. Using default URLs.");
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Configuration error: {ex.Message}");
+            Console.WriteLine("Using default URLs: http://localhost:7001");
+        }
+
+        builder.Services
+            .AddMcpServer()
+            .WithHttpTransport()
+            .WithPrompts<CreateMcpServerPrompts>()
+            .WithTools<CreateMcpServerTools>()
+            .WithTools<DotnetBuildTools>();
+
+        var app = builder.Build();
+
+        app.MapMcp();
+
+        app.Run(httpAddress);
     }
 }
-catch (Exception ex)
-{
-    Console.WriteLine($"Configuration error: {ex.Message}");
-    Console.WriteLine("Using default URLs: http://localhost:7001");
-    builder.WebHost.UseUrls("http://localhost:7002");
-}
-
-builder.Services
-    .AddMcpServer()
-    .WithHttpTransport()
-    .WithPrompts<CreateMcpServerPrompts>()
-    .WithTools<CreateMcpServerTools>()
-    .WithTools<DotnetBuildTools>();
-
-var app = builder.Build();
-
-app.MapMcp();
-
-app.Run();
