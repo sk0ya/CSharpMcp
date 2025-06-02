@@ -4,7 +4,7 @@ namespace FileSystem.Common;
 
 public static class Constants
 {
-    public static readonly Encoding DefaultEncoding = Encoding.UTF8;
+    public static readonly Encoding DefaultEncoding = new UTF8Encoding(false);
     
     public const long MaxFileSize = 10 * 1024 * 1024;
 

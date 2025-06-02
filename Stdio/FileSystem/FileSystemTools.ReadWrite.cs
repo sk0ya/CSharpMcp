@@ -353,6 +353,12 @@ public static partial class FileSystemTools
 
         try
         {
+            // UTF-8の場合は明示的にBOMなしを指定
+            if (encodingName.Equals("utf-8", StringComparison.OrdinalIgnoreCase))
+            {
+                return new UTF8Encoding(false);
+            }
+            
             return Encoding.GetEncoding(encodingName);
         }
         catch (ArgumentException)
